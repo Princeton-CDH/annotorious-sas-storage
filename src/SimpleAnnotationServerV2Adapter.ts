@@ -14,7 +14,7 @@ import type { Body as V3Body } from "./types/V3/Body";
 import type { Selector as V2Selector } from "./types/V2/Selector";
 import type { Selector as V3Selector } from "./types/V3/Selector";
 import type { Source } from "./types/V3/Source";
-import { Target } from "./types/V3/Target";
+import type { Target } from "./types/V3/Target";
 
 export default class SimpleAnnotationServerV2Adapter {
     canvasId: string;

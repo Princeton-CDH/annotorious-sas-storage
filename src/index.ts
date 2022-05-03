@@ -1,6 +1,5 @@
 // annotorious plugin to use simple annotation server as a storage
 
-import "core-js";
 import SimpleAnnotationServerV2Adapter from "./SimpleAnnotationServerV2Adapter";
 import type { Annotation } from "./types/V3/Annotation";
 import type { AnnotationPage } from "./types/V3/AnnotationPage";
@@ -49,6 +48,7 @@ const AnnotationServerStorage = (anno: any, settings: Settings) => {
             document.dispatchEvent(AnnoLoadEvent);
         });
         // how to update id for annotorious?
+        console.log(annotation);
         anno.addAnnotation(annotation);
         return annotation;
     });
@@ -70,7 +70,9 @@ const AnnotationServerStorage = (anno: any, settings: Settings) => {
 
     // delete an annotation
     anno.on("deleteAnnotation", (annotation: Annotation) => {
-        adapter.delete(annotation.id);
+        // TODO: Fix this, should not be passing empty string! (ensure id is always defined for V3
+        // Annotation and adjust adapter)
+        adapter.delete(annotation.id || "");
     });
 
     const storagePlugin = {

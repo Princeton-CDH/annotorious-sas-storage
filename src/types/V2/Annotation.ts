@@ -4,7 +4,7 @@ import { Target } from "./Target";
 interface Annotation {
     "@context": string;
     "@type": string;
-    "@id": string;
+    "@id"?: string;
     motivation: string;
     on: Target;
     resource: Body | Body[];

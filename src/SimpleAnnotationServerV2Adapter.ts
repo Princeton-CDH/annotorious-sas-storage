@@ -109,7 +109,7 @@ export default class SimpleAnnotationServerV2Adapter {
         const v2anno: V2Annotation = {
             // copy id if it is SAS-generated
             // TODO: What id to use if it is not?
-            "@id": v3anno.id && v3anno.id.startsWith("http") ? v3anno.id : "",
+            "@id": v3anno.id && v3anno.id.startsWith("http") ? v3anno.id : undefined,
             "@context": "http://iiif.io/api/presentation/2/context.json",
             "@type": "oa:Annotation",
             motivation: "oa:commenting", // TODO: use v3anno.motivation

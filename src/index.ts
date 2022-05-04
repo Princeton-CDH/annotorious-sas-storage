@@ -1,7 +1,7 @@
 // annotorious plugin to use simple annotation server as a storage
 
 import SimpleAnnotationServerV2Adapter from "./SimpleAnnotationServerV2Adapter";
-import type { Annotation, AnnotationWithId } from "./types/V3/Annotation";
+import type { Annotation, SavedAnnotation } from "./types/V3/Annotation";
 import type { AnnotationPage } from "./types/V3/AnnotationPage";
 import type { Settings } from "./types/Settings";
 import type { Target } from "./types/V3/Target";
@@ -69,7 +69,7 @@ const AnnotationServerStorage = (anno: any, settings: Settings) => {
     );
 
     // delete an annotation
-    anno.on("deleteAnnotation", (annotation: AnnotationWithId) => {
+    anno.on("deleteAnnotation", (annotation: SavedAnnotation) => {
         adapter.delete(annotation.id);
     });
 

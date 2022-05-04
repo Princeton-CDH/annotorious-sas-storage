@@ -10,8 +10,8 @@ interface Annotation {
     type: string;
 }
 
-interface AnnotationWithId extends Annotation {
+interface SavedAnnotation extends Annotation {
     id: string;
 };
 
-export { Annotation, AnnotationWithId };
+export { Annotation, SavedAnnotation };

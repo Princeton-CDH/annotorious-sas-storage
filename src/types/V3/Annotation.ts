@@ -10,4 +10,8 @@ interface Annotation {
     type: string;
 }
 
-export { Annotation };
+interface AnnotationWithId extends Annotation {
+    id: string;
+};
+
+export { Annotation, AnnotationWithId };

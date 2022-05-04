@@ -1,10 +1,10 @@
 // annotorious plugin to use simple annotation server as a storage
 
-import SimpleAnnotationServerV2Adapter from "./SimpleAnnotationServerV2Adapter";
+import SimpleAnnotationServerV2Adapter from "./utils/SimpleAnnotationServerV2Adapter";
+import adjustTargetSource from "./utils/adjustTargetSource";
 import type { Annotation, SavedAnnotation } from "./types/V3/Annotation";
 import type { AnnotationPage } from "./types/V3/AnnotationPage";
 import type { Settings } from "./types/Settings";
-import type { Target } from "./types/V3/Target";
 
 // define a custom event to indicate that annotations have been loaded
 const AnnoLoadEvent = new Event("annotations-loaded");
@@ -21,27 +21,9 @@ const AnnotationServerStorage = (anno: any, settings: Settings) => {
         document.dispatchEvent(AnnoLoadEvent);
     });
 
-    function adjustTargetSource(target: Target) {
-        // annotorious sets the target source as a string id;
-        // we need to structure it to add canvas/manifest info
-        if (typeof target.source == "string") {
-            // add manifest id to annotation
-            target.source = {
-                // use the configured target (should be canvas id)
-                id: settings.target,
-                // link to containing manifest
-                partOf: {
-                    id: settings.manifest,
-                    type: "Manifest",
-                },
-                type: "Canvas",
-            };
-        }
-    }
-
     // create a new annotation
     anno.on("createAnnotation", async (annotation: Annotation) => {
-        adjustTargetSource(annotation.target);
+        adjustTargetSource(annotation.target, settings);
         adapter.create(annotation).then(() => {
             // by default, storage reloads all annotations for this page;
             // signal that annotations have been loaded
@@ -61,7 +43,7 @@ const AnnotationServerStorage = (anno: any, settings: Settings) => {
             let newId = annotation.id; // do we need to do anything with this?
             annotation.id = previous.id;
             // target needs to be updated if the image selection has changed
-            adjustTargetSource(annotation.target);
+            adjustTargetSource(annotation.target, settings);
             adapter.update(annotation);
             // add the annotation to annotorious again to make sure the display is up to date
             anno.addAnnotation(annotation);

@@ -60,6 +60,7 @@ This project is written in TypeScript, and organized according to the following 
 
 - `/src` contains the source code of the repository
     - `/src/types` contains type definitions used in the TypeScript code
+    - `/src/utils` contains utility functions and classes
     - `/src/index.ts` is the entrypoint for the TypeScript code
 - `/dist` contains the build outputs and should not be directly modified
     - `/dist/index.js` is the entrypoint for the built JavaScipt code

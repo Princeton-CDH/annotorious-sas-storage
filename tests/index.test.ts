@@ -2,7 +2,7 @@ import AnnotationServerStorage from "../src/index";
 import SimpleAnnotationServerV2Adapter from "../src/utils/SimpleAnnotationServerV2Adapter";
 
 // Mock the adapter
-jest.mock("../src/SimpleAnnotationServerV2Adapter", () => {
+jest.mock("../src/utils/SimpleAnnotationServerV2Adapter", () => {
     return {
         __esModule: true,
         default: jest.fn().mockImplementation(() => ({

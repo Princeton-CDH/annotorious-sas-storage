@@ -9,13 +9,13 @@ jest.mock("../src/utils/SimpleAnnotationServerV2Adapter", () => {
             // Mock the Promise and data returned by all()
             all: jest.fn().mockImplementation(
                 () =>
-                    new Promise((resolve, reject) =>
+                    new Promise((resolve) =>
                         resolve({
                             id: "test",
                             items: [],
                             type: "AnnotationPage",
-                        })
-                    )
+                        }),
+                    ),
             ),
             create: jest.fn(),
             update: jest.fn(),
@@ -39,7 +39,7 @@ test("should instantiate the plugin and dispatch the anno load event", async () 
         manifest: "fakeManifest",
         target: "fakeCanvas",
     };
-    const dispatchEventSpy = jest.spyOn(document, 'dispatchEvent');
+    const dispatchEventSpy = jest.spyOn(document, "dispatchEvent");
     AnnotationServerStorage(clientMock, settings);
 
     // Should instantiate the adapter with the above settings
@@ -55,5 +55,7 @@ test("should instantiate the plugin and dispatch the anno load event", async () 
 
     // should dispatch the event "annotations-loaded"
     expect(adapterMock).toHaveBeenCalled();
-    expect(dispatchEventSpy).toHaveBeenCalledWith(new Event("annotations-loaded"));
+    expect(dispatchEventSpy).toHaveBeenCalledWith(
+        new Event("annotations-loaded"),
+    );
 });

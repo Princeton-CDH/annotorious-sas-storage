@@ -18,4 +18,4 @@ test("should convert string target source to Source type", () => {
     });
     // should leave Source type object alone
     expect(adjustTargetSource(newSource, settings)).toBe(newSource);
-})
+});

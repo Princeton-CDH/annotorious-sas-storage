@@ -9,10 +9,12 @@ import type { Settings } from "./types/Settings";
 // define a custom event to indicate that annotations have been loaded
 const AnnoLoadEvent = new Event("annotations-loaded");
 
+// TODO: Add a typedef for the Annotorious client (anno)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const AnnotationServerStorage = (anno: any, settings: Settings) => {
-    let adapter = new SimpleAnnotationServerV2Adapter(
+    const adapter = new SimpleAnnotationServerV2Adapter(
         settings.target, // should be canvas id
-        settings.annotationEndpoint
+        settings.annotationEndpoint,
     );
 
     // load and display annotations from server
@@ -23,7 +25,10 @@ const AnnotationServerStorage = (anno: any, settings: Settings) => {
 
     // create a new annotation
     anno.on("createAnnotation", async (annotation: Annotation) => {
-        annotation.target.source = adjustTargetSource(annotation.target.source, settings);
+        annotation.target.source = adjustTargetSource(
+            annotation.target.source,
+            settings,
+        );
         adapter.create(annotation).then(() => {
             // by default, storage reloads all annotations for this page;
             // signal that annotations have been loaded
@@ -40,14 +45,17 @@ const AnnotationServerStorage = (anno: any, settings: Settings) => {
         "updateAnnotation",
         (annotation: Annotation, previous: Annotation) => {
             // The posted annotation should have an @id which exists in the store
-            let newId = annotation.id; // do we need to do anything with this?
+            // const newId = annotation.id; // do we need to do anything with this?
             annotation.id = previous.id;
             // target needs to be updated if the image selection has changed
-            annotation.target.source = adjustTargetSource(annotation.target.source, settings);
+            annotation.target.source = adjustTargetSource(
+                annotation.target.source,
+                settings,
+            );
             adapter.update(annotation);
             // add the annotation to annotorious again to make sure the display is up to date
             anno.addAnnotation(annotation);
-        }
+        },
     );
 
     // delete an annotation

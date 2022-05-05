@@ -12,6 +12,6 @@ interface Annotation {
 
 interface SavedAnnotation extends Annotation {
     id: string;
-};
+}
 
 export { Annotation, SavedAnnotation };

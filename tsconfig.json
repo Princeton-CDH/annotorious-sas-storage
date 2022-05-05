@@ -4,6 +4,6 @@
       "lib": ["es2021", "dom"],
       "sourceMap": true,
     },
-    "include": ["src/**/*"],
+    "include": ["src/**/*", "tests/**/*"],
     "exclude": ["node_modules", "**/*.spec.ts"]
 }

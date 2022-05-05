@@ -17,5 +17,5 @@
         "@typescript-eslint/no-unused-vars": "error",
         "@typescript-eslint/quotes": [2, "double", "avoid-escape"]
     },
-    "ignorePatterns": [".eslintrc", "webpack.config.js", "dist/**/*"]
+    "ignorePatterns": [".eslintrc", "*.config.js", "dist/**/*"]
 }

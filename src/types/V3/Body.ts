@@ -5,6 +5,6 @@ interface Body {
     purpose?: string;
     format?: string;
     language?: string;
-};
+}
 
 export { Body };

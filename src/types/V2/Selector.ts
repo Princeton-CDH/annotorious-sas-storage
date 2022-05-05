@@ -3,6 +3,6 @@ interface Selector {
     value?: string;
     item?: Selector;
     default?: Selector;
-};
+}
 
 export { Selector };

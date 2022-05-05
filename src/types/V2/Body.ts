@@ -3,6 +3,6 @@ interface Body {
     chars: string;
     format?: string;
     language?: string;
-};
+}
 
 export { Body };

@@ -8,6 +8,6 @@ interface Annotation {
     motivation: string;
     on: Target;
     resource: Body | Body[];
-};
+}
 
 export { Annotation };

@@ -60,8 +60,34 @@ This project is written in TypeScript, and organized according to the following 
 
 - `/src` contains the source code of the repository
     - `/src/types` contains type definitions used in the TypeScript code
+    - `/src/utils` contains utility functions and classes
     - `/src/index.ts` is the entrypoint for the TypeScript code
+- `/tests` contains Jest unit tests, and should mirror the structure of `/src`
 - `/dist` contains the build outputs and should not be directly modified
     - `/dist/index.js` is the entrypoint for the built JavaScipt code
 
 > Note: `/dist` is used for development builds, while bundled releases will be published to NPM.
+
+### Code style and linting
+
+This project uses ESLint to manage code style and enforce consistency.
+
+If you are using VSCode, you will need to install the [ESLint extension](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint). Then, your editor should pick up the settings from `.vscode/settings.json`, which specify that ESLint will auto-fix any style errors on saving a file.
+
+You may also use the following scripts to check for and fix linter errors:
+
+```sh
+npm run lint
+```
+
+```sh
+npm run lint:fix
+```
+
+### Testing
+
+This project uses Jest for unit tests, stored in the `/tests` directory. Tests can be run with the following command:
+
+```sh
+npm test
+```

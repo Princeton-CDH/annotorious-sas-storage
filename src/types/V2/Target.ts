@@ -8,6 +8,6 @@ interface Target {
         "@id": string;
         "@type": string;
     };
-};
+}
 
 export { Target };

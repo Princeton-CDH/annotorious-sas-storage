@@ -6,18 +6,19 @@
 
 */
 
-import type { Annotation as V2Annotation } from "./types/V2/Annotation";
-import type { Annotation as V3Annotation } from "./types/V3/Annotation";
-import type { AnnotationPage } from "./types/V3/AnnotationPage";
-import type { Body as V2Body } from "./types/V2/Body";
-import type { Body as V3Body } from "./types/V3/Body";
-import type { Selector as V2Selector } from "./types/V2/Selector";
-import type { Selector as V3Selector } from "./types/V3/Selector";
-import type { Source } from "./types/V3/Source";
-import type { Target } from "./types/V3/Target";
+import type { Annotation as V2Annotation } from "../types/V2/Annotation";
+import type { Annotation as V3Annotation } from "../types/V3/Annotation";
+import type { AnnotationPage } from "../types/V3/AnnotationPage";
+import type { Body as V2Body } from "../types/V2/Body";
+import type { Body as V3Body } from "../types/V3/Body";
+import type { Selector as V2Selector } from "../types/V2/Selector";
+import type { Selector as V3Selector } from "../types/V3/Selector";
+import type { Source } from "../types/V3/Source";
+import type { Target } from "../types/V3/Target";
 
 export default class SimpleAnnotationServerV2Adapter {
     canvasId: string;
+
     endpointUrl: string;
 
     /** */
@@ -35,7 +36,7 @@ export default class SimpleAnnotationServerV2Adapter {
     async create(annotation: V3Annotation) {
         return fetch(`${this.endpointUrl}/create`, {
             body: JSON.stringify(
-                SimpleAnnotationServerV2Adapter.createV2Anno(annotation)
+                SimpleAnnotationServerV2Adapter.createV2Anno(annotation),
             ),
             headers: {
                 Accept: "application/json",
@@ -51,7 +52,7 @@ export default class SimpleAnnotationServerV2Adapter {
     async update(annotation: V3Annotation) {
         return fetch(`${this.endpointUrl}/update`, {
             body: JSON.stringify(
-                SimpleAnnotationServerV2Adapter.createV2Anno(annotation)
+                SimpleAnnotationServerV2Adapter.createV2Anno(annotation),
             ),
             headers: {
                 Accept: "application/json",
@@ -73,7 +74,7 @@ export default class SimpleAnnotationServerV2Adapter {
                     "Content-Type": "application/json",
                 },
                 method: "DELETE",
-            }
+            },
         )
             .then(() => this.all())
             .catch(() => this.all());
@@ -85,7 +86,7 @@ export default class SimpleAnnotationServerV2Adapter {
         const annotationPage = await this.all();
         if (annotationPage) {
             return annotationPage.items.find(
-                (item: V3Annotation) => item.id === annoId
+                (item: V3Annotation) => item.id === annoId,
             );
         }
         return null;
@@ -109,7 +110,10 @@ export default class SimpleAnnotationServerV2Adapter {
         const v2anno: V2Annotation = {
             // copy id if it is SAS-generated
             // TODO: What id to use if it is not?
-            "@id": v3anno.id && v3anno.id.startsWith("http") ? v3anno.id : undefined,
+            "@id":
+                v3anno.id && v3anno.id.startsWith("http")
+                    ? v3anno.id
+                    : undefined,
             "@context": "http://iiif.io/api/presentation/2/context.json",
             "@type": "oa:Annotation",
             motivation: "oa:commenting", // TODO: use v3anno.motivation
@@ -123,7 +127,7 @@ export default class SimpleAnnotationServerV2Adapter {
             if (Array.isArray(v3anno.target.selector)) {
                 const selectors = v3anno.target.selector.map((s) => {
                     if (s) {
-                        let v2Selector = this.createV2AnnoSelector(s);
+                        const v2Selector = this.createV2AnnoSelector(s);
                         if (v2Selector) return v2Selector;
                     }
                 });
@@ -134,8 +138,8 @@ export default class SimpleAnnotationServerV2Adapter {
                     item: selectors[1],
                 };
             } else {
-                let v2Selector = this.createV2AnnoSelector(
-                    v3anno.target.selector
+                const v2Selector = this.createV2AnnoSelector(
+                    v3anno.target.selector,
                 );
                 if (v2Selector) v2anno.on.selector = v2Selector;
             }
@@ -187,7 +191,7 @@ export default class SimpleAnnotationServerV2Adapter {
     createAnnotationPage(v2annos: V2Annotation[]): AnnotationPage {
         if (Array.isArray(v2annos)) {
             const v3annos = v2annos.map((a) =>
-                SimpleAnnotationServerV2Adapter.createV3Anno(a)
+                SimpleAnnotationServerV2Adapter.createV3Anno(a),
             );
             return {
                 id: this.annotationPageId,
@@ -210,8 +214,10 @@ export default class SimpleAnnotationServerV2Adapter {
         if (Array.isArray(v2target)) {
             [v2target] = v2target;
         }
-        let target: Target = {
-            selector: v2target.selector ? this.createV3AnnoSelector(v2target.selector) : undefined,
+        const target: Target = {
+            selector: v2target.selector
+                ? this.createV3AnnoSelector(v2target.selector)
+                : undefined,
             source: v2target.full,
         };
         if (v2target.within) {
@@ -253,6 +259,7 @@ export default class SimpleAnnotationServerV2Adapter {
     }
 
     /** */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     static createV3AnnoSelector(v2selector: V2Selector): any {
         // TODO: type-safe this return value
         switch (v2selector["@type"]) {
@@ -266,7 +273,9 @@ export default class SimpleAnnotationServerV2Adapter {
                     type: "FragmentSelector",
                     conformsTo: "http://www.w3.org/TR/media-frags/",
                     // SAS returns location in xywh=x,y,w,h format; annotorious uses pixel:x,y,w,h
-                    value: v2selector.value ? v2selector.value.replace("xywh=", "xywh=pixel:") : "",
+                    value: v2selector.value
+                        ? v2selector.value.replace("xywh=", "xywh=pixel:")
+                        : "",
                 };
             case "oa:Choice":
                 /* create alternate selectors */

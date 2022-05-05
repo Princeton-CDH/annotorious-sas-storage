@@ -72,7 +72,7 @@ This project is written in TypeScript, and organized according to the following 
 
 This project uses ESLint to manage code style and enforce consistency.
 
-If you are using VSCode, your client should pick up the settings from `.vscode/settings.json`, which specify that ESLint will auto-fix any style errors on saving a file.
+If you are using VSCode, you will need to install the [ESLint extension](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint). Then, your editor should pick up the settings from `.vscode/settings.json`, which specify that ESLint will auto-fix any style errors on saving a file.
 
 You may also use the following scripts to check for and fix linter errors:
 

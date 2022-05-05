@@ -3,4 +3,9 @@
 module.exports = {
     preset: "ts-jest",
     testEnvironment: "jsdom",
+    coverageThreshold: {
+        "global": {
+          "statements": 95
+        }
+    },  
 };

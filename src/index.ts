@@ -23,7 +23,7 @@ const AnnotationServerStorage = (anno: any, settings: Settings) => {
 
     // create a new annotation
     anno.on("createAnnotation", async (annotation: Annotation) => {
-        adjustTargetSource(annotation.target, settings);
+        annotation.target.source = adjustTargetSource(annotation.target.source, settings);
         adapter.create(annotation).then(() => {
             // by default, storage reloads all annotations for this page;
             // signal that annotations have been loaded
@@ -43,7 +43,7 @@ const AnnotationServerStorage = (anno: any, settings: Settings) => {
             let newId = annotation.id; // do we need to do anything with this?
             annotation.id = previous.id;
             // target needs to be updated if the image selection has changed
-            adjustTargetSource(annotation.target, settings);
+            annotation.target.source = adjustTargetSource(annotation.target.source, settings);
             adapter.update(annotation);
             // add the annotation to annotorious again to make sure the display is up to date
             anno.addAnnotation(annotation);

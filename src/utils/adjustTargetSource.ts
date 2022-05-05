@@ -1,12 +1,12 @@
 import { Settings } from "../types/Settings";
-import { Target } from "../types/V3/Target";
+import { Source } from "../types/V3/Source";
 
-const adjustTargetSource = (target: Target, settings: Settings) => {
+const adjustTargetSource = (source: Source | string, settings: Settings): Source => {
     // annotorious sets the target source as a string id;
     // we need to structure it to add canvas/manifest info
-    if (typeof target.source == "string") {
+    if (typeof source == "string") {
         // add manifest id to annotation
-        target.source = {
+        source = {
             // use the configured target (should be canvas id)
             id: settings.target,
             // link to containing manifest
@@ -17,6 +17,7 @@ const adjustTargetSource = (target: Target, settings: Settings) => {
             type: "Canvas",
         };
     }
+    return source;
 }
 
 export default adjustTargetSource;

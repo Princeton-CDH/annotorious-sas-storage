@@ -29,13 +29,16 @@ const AnnotationServerStorage = (anno: any, settings: Settings) => {
             annotation.target.source,
             settings,
         );
+        // reassign ID to a URI on the annotation endpoint
+        const oldId = annotation.id;
+        annotation.id = settings.annotationEndpoint + "/" + annotation.id?.replace("#", "");
         adapter.create(annotation).then(() => {
             // by default, storage reloads all annotations for this page;
             // signal that annotations have been loaded
             document.dispatchEvent(AnnoLoadEvent);
         });
-        // how to update id for annotorious?
-        console.log(annotation);
+        // remove the annotation with the old ID, add the one with the new ID
+        anno.removeAnnotation(oldId);
         anno.addAnnotation(annotation);
         return annotation;
     });

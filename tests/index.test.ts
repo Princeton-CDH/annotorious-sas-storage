@@ -53,6 +53,7 @@ const eventArray: { name: string; fn: (data?: any) => any }[] = [];
 const clientMock = {
     addAnnotation: jest.fn(),
     setAnnotations: jest.fn(),
+    removeAnnotation: jest.fn(),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     on: jest.fn().mockImplementation((evtName: string, handler: () => any) => {
         // add name/handler pair to events array

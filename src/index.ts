@@ -54,7 +54,8 @@ class AnnotationServerStorage {
     }
 
     // update an annotation
-    handleUpdateAnnotation(annotation: Annotation, previous: Annotation) {
+    handleUpdateAnnotation(annotation: SavedAnnotation, previous: SavedAnnotation) {
+
         // The posted annotation should have an @id which exists in the store
         // const newId = annotation.id; // do we need to do anything with this?
         annotation.id = previous.id;

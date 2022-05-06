@@ -131,6 +131,7 @@ describe("Event handlers", () => {
         // initialize the storage
         new AnnotationServerStorage(clientMock, settings);
     });
+
     it("should respond to emitted createAnnotation event with handler", async () => {
         const annotation = {
             "@context": "fakeContext",
@@ -149,5 +150,49 @@ describe("Event handlers", () => {
         expect(mockCreate).toHaveBeenCalledWith(annotation);
         // should call addAnnotation on client
         expect(clientMock.addAnnotation).toHaveBeenCalledWith(annotation);
+    });
+
+    it("should respond to emitted updateAnnotation event with handler", async () => {
+        const annotation = {
+            "@context": "fakeContext",
+            id: "newId",
+            body: {},
+            motivation: "commenting",
+            target: { source: "fakesource" },
+            type: "Annotation",
+        };
+        const previous = {
+            "@context": "oldfakeContext",
+            id: "oldId",
+            body: {},
+            motivation: "commenting",
+            target: { source: "oldfakesource" },
+            type: "Annotation",
+        };
+
+        clientMock.emit("updateAnnotation", annotation, previous);
+        // should call AdjustTargetSource
+        expect(adjustTargetSourceMock).toHaveBeenCalledWith(
+            "fakesource",
+            settings,
+        );
+        // should call adapter.update
+        expect(mockUpdate).toHaveBeenCalledWith(annotation);
+        // should call addAnnotation on client
+        expect(clientMock.addAnnotation).toHaveBeenCalledWith(annotation);
+    });
+
+    it("should respond to emitted deleteAnnotation event with handler", async () => {
+        const annotation = {
+            "@context": "fakeContext",
+            id: "someId",
+            body: {},
+            motivation: "commenting",
+            target: { source: "fakesource" },
+            type: "Annotation",
+        };
+        clientMock.emit("deleteAnnotation", annotation);
+        // should call adapter.delete
+        expect(mockDelete).toHaveBeenCalledWith(annotation.id);
     });
 });

@@ -82,7 +82,7 @@ describe("Plugin instantiation", () => {
 
     it("Should instantiate the adapter with the above settings", () => {
         // initialize the storage
-        AnnotationServerStorage(clientMock, settings);
+        new AnnotationServerStorage(clientMock, settings);
         expect(adapterMock).toHaveBeenCalled();
         expect(adapterMock).toHaveBeenCalledWith("fakeCanvas", "fakeEndpoint");
     });
@@ -92,7 +92,7 @@ describe("Plugin instantiation", () => {
         const dispatchEventSpy = jest.spyOn(document, "dispatchEvent");
 
         // initialize the storage
-        AnnotationServerStorage(clientMock, settings);
+        new AnnotationServerStorage(clientMock, settings);
         // ensure then() is called
         await Promise.resolve();
 
@@ -104,7 +104,7 @@ describe("Plugin instantiation", () => {
 
     it("Should call setAnnotations with an empty array from settings", async () => {
         // initialize the storage
-        AnnotationServerStorage(clientMock, settings);
+        new AnnotationServerStorage(clientMock, settings);
         // ensure then() is called
         await Promise.resolve();
 
@@ -114,7 +114,7 @@ describe("Plugin instantiation", () => {
 
     it("Should initialize the event listeners", async () => {
         // initialize the storage
-        AnnotationServerStorage(clientMock, settings);
+        new AnnotationServerStorage(clientMock, settings);
         // ensure then() is called
         await Promise.resolve();
 
@@ -129,7 +129,7 @@ describe("Event handlers", () => {
         clientMock.on.mockClear();
         clientMock.emit.mockClear();
         // initialize the storage
-        AnnotationServerStorage(clientMock, settings);
+        new AnnotationServerStorage(clientMock, settings);
     });
     it("should respond to emitted createAnnotation event with handler", async () => {
         const annotation = {

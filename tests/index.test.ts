@@ -49,7 +49,7 @@ const adapterMock =
 
 // Mock the Annotorious client
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const eventArray: { name: string; fn: (data?: any) => any }[] = [];
+const eventArray: { name: string; fn: (...data: any) => any }[] = [];
 const clientMock = {
     addAnnotation: jest.fn(),
     setAnnotations: jest.fn(),
@@ -59,9 +59,9 @@ const clientMock = {
         eventArray.push({ name: evtName, fn: handler });
     }),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    emit: jest.fn().mockImplementation((evtName: string, data?: any) => {
+    emit: jest.fn().mockImplementation((evtName: string, ...data: any) => {
         // match event name to a handler in events array, pass data
-        eventArray.find((evt) => evt.name === evtName)?.fn(data);
+        eventArray.find((evt) => evt.name === evtName)?.fn(...data);
     }),
 };
 

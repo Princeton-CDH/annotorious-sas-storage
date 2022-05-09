@@ -1,7 +1,9 @@
 import AnnotationServerStorage from "../src/index";
-import { Annotation } from "../src/types/V3/Annotation";
 import SimpleAnnotationServerV2Adapter from "../src/utils/SimpleAnnotationServerV2Adapter";
 import adjustTargetSource from "../src/utils/adjustTargetSource";
+
+// Mock the V2-V3 adapter
+jest.mock("../src/utils/SimpleAnnotationServerV2Adapter");
 
 // Mock the adjustTargetSource util
 jest.mock("../src/utils/adjustTargetSource", () => {
@@ -11,41 +13,6 @@ jest.mock("../src/utils/adjustTargetSource", () => {
     };
 });
 const adjustTargetSourceMock = adjustTargetSource as jest.Mock;
-
-// Mock the V2-V3 adapter
-const mockCreate = jest
-    .fn()
-    .mockImplementation(
-        (annotation: Annotation) =>
-            new Promise((resolve) => resolve(annotation)),
-    );
-const mockAll = jest.fn().mockImplementation(
-    () =>
-        new Promise((resolve) =>
-            resolve({
-                id: "test",
-                items: [],
-                type: "AnnotationPage",
-            }),
-        ),
-);
-const mockUpdate = jest.fn();
-const mockDelete = jest.fn();
-jest.mock("../src/utils/SimpleAnnotationServerV2Adapter", () => {
-    return {
-        __esModule: true,
-        default: jest.fn().mockImplementation(() => ({
-            // Mock the Promise and data returned by all()
-            all: mockAll,
-            create: mockCreate,
-            update: mockUpdate,
-            delete: mockDelete,
-        })),
-    };
-});
-// This is required for TypeScript to accept the mock as an instance of the mocked class:
-const adapterMock =
-    SimpleAnnotationServerV2Adapter as unknown as jest.Mock<SimpleAnnotationServerV2Adapter>;
 
 // Mock the Annotorious client
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -60,9 +27,9 @@ const clientMock = {
         eventArray.push({ name: evtName, fn: handler });
     }),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    emit: jest.fn().mockImplementation((evtName: string, data?: any) => {
+    emit: jest.fn().mockImplementation(async (evtName: string, data?: any) => {
         // match event name to a handler in events array, pass data
-        eventArray.find((evt) => evt.name === evtName)?.fn(data);
+        await eventArray.find((evt) => evt.name === evtName)?.fn(data);
     }),
 };
 
@@ -76,16 +43,15 @@ const settings = {
 describe("Plugin instantiation", () => {
     beforeEach(() => {
         // Reset mocks before each test
-        adapterMock.mockClear();
         clientMock.on.mockClear();
         clientMock.setAnnotations.mockClear();
     });
 
-    it("Should instantiate the adapter with the above settings", () => {
+    it("Should instantiate the adapter with the above settings", async () => {
         // initialize the storage
-        AnnotationServerStorage(clientMock, settings);
-        expect(adapterMock).toHaveBeenCalled();
-        expect(adapterMock).toHaveBeenCalledWith("fakeCanvas", "fakeEndpoint");
+        const allSpy = jest.spyOn(SimpleAnnotationServerV2Adapter.prototype, "all");
+        await AnnotationServerStorage(clientMock, settings);
+        expect(allSpy).toHaveBeenCalled();
     });
 
     it("Should dispatch the anno load event", async () => {
@@ -93,9 +59,7 @@ describe("Plugin instantiation", () => {
         const dispatchEventSpy = jest.spyOn(document, "dispatchEvent");
 
         // initialize the storage
-        AnnotationServerStorage(clientMock, settings);
-        // ensure then() is called
-        await Promise.resolve();
+        await AnnotationServerStorage(clientMock, settings);
 
         // Should dispatch the event "annotations-loaded"
         expect(dispatchEventSpy).toHaveBeenCalledWith(
@@ -105,9 +69,7 @@ describe("Plugin instantiation", () => {
 
     it("Should call setAnnotations with an empty array from settings", async () => {
         // initialize the storage
-        AnnotationServerStorage(clientMock, settings);
-        // ensure then() is called
-        await Promise.resolve();
+        await AnnotationServerStorage(clientMock, settings);
 
         expect(clientMock.setAnnotations).toHaveBeenCalled();
         expect(clientMock.setAnnotations.mock.calls[0][0]).toStrictEqual([]);
@@ -115,24 +77,24 @@ describe("Plugin instantiation", () => {
 
     it("Should initialize the event listeners", async () => {
         // initialize the storage
-        AnnotationServerStorage(clientMock, settings);
-        // ensure then() is called
-        await Promise.resolve();
+        await AnnotationServerStorage(clientMock, settings);
 
         expect(clientMock.on).toHaveBeenCalledTimes(3);
     });
 });
 
 describe("Event handlers", () => {
-    beforeEach(() => {
+    beforeEach(async () => {
         // Reset mocks before each test
-        adapterMock.mockClear();
         clientMock.on.mockClear();
         clientMock.emit.mockClear();
-        // initialize the storage
-        AnnotationServerStorage(clientMock, settings);
     });
     it("should respond to emitted createAnnotation event with handler", async () => {
+        const createSpy = jest.spyOn(SimpleAnnotationServerV2Adapter.prototype, "create");
+
+        // initialize the storage
+        await AnnotationServerStorage(clientMock, settings);
+
         const annotation = {
             "@context": "fakeContext",
             body: {},
@@ -140,14 +102,14 @@ describe("Event handlers", () => {
             target: { source: "fakesource" },
             type: "Annotation",
         };
-        clientMock.emit("createAnnotation", annotation);
+        await clientMock.emit("createAnnotation", annotation);
         // should call AdjustTargetSource
         expect(adjustTargetSourceMock).toHaveBeenCalledWith(
             "fakesource",
             settings,
         );
         // should call adapter.create
-        expect(mockCreate).toHaveBeenCalledWith(annotation);
+        expect(createSpy).toHaveBeenCalledWith(annotation);
         // should call addAnnotation on client
         expect(clientMock.addAnnotation).toHaveBeenCalledWith(annotation);
     });

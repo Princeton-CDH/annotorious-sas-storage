@@ -49,7 +49,7 @@ const adapterMock =
 
 // Mock the Annotorious client
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const eventArray: { name: string; fn: (data?: any) => any }[] = [];
+const eventArray: { name: string; fn: (...data: any) => any }[] = [];
 const clientMock = {
     addAnnotation: jest.fn(),
     setAnnotations: jest.fn(),
@@ -59,9 +59,9 @@ const clientMock = {
         eventArray.push({ name: evtName, fn: handler });
     }),
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    emit: jest.fn().mockImplementation((evtName: string, data?: any) => {
+    emit: jest.fn().mockImplementation((evtName: string, ...data: any) => {
         // match event name to a handler in events array, pass data
-        eventArray.find((evt) => evt.name === evtName)?.fn(data);
+        eventArray.find((evt) => evt.name === evtName)?.fn(...data);
     }),
 };
 
@@ -82,7 +82,7 @@ describe("Plugin instantiation", () => {
 
     it("Should instantiate the adapter with the above settings", () => {
         // initialize the storage
-        AnnotationServerStorage(clientMock, settings);
+        new AnnotationServerStorage(clientMock, settings);
         expect(adapterMock).toHaveBeenCalled();
         expect(adapterMock).toHaveBeenCalledWith("fakeCanvas", "fakeEndpoint");
     });
@@ -92,7 +92,7 @@ describe("Plugin instantiation", () => {
         const dispatchEventSpy = jest.spyOn(document, "dispatchEvent");
 
         // initialize the storage
-        AnnotationServerStorage(clientMock, settings);
+        new AnnotationServerStorage(clientMock, settings);
         // ensure then() is called
         await Promise.resolve();
 
@@ -104,7 +104,7 @@ describe("Plugin instantiation", () => {
 
     it("Should call setAnnotations with an empty array from settings", async () => {
         // initialize the storage
-        AnnotationServerStorage(clientMock, settings);
+        new AnnotationServerStorage(clientMock, settings);
         // ensure then() is called
         await Promise.resolve();
 
@@ -114,7 +114,7 @@ describe("Plugin instantiation", () => {
 
     it("Should initialize the event listeners", async () => {
         // initialize the storage
-        AnnotationServerStorage(clientMock, settings);
+        new AnnotationServerStorage(clientMock, settings);
         // ensure then() is called
         await Promise.resolve();
 
@@ -129,8 +129,9 @@ describe("Event handlers", () => {
         clientMock.on.mockClear();
         clientMock.emit.mockClear();
         // initialize the storage
-        AnnotationServerStorage(clientMock, settings);
+        new AnnotationServerStorage(clientMock, settings);
     });
+
     it("should respond to emitted createAnnotation event with handler", async () => {
         const annotation = {
             "@context": "fakeContext",
@@ -149,5 +150,49 @@ describe("Event handlers", () => {
         expect(mockCreate).toHaveBeenCalledWith(annotation);
         // should call addAnnotation on client
         expect(clientMock.addAnnotation).toHaveBeenCalledWith(annotation);
+    });
+
+    it("should respond to emitted updateAnnotation event with handler", async () => {
+        const annotation = {
+            "@context": "fakeContext",
+            id: "newId",
+            body: {},
+            motivation: "commenting",
+            target: { source: "fakesource" },
+            type: "Annotation",
+        };
+        const previous = {
+            "@context": "oldfakeContext",
+            id: "oldId",
+            body: {},
+            motivation: "commenting",
+            target: { source: "oldfakesource" },
+            type: "Annotation",
+        };
+
+        clientMock.emit("updateAnnotation", annotation, previous);
+        // should call AdjustTargetSource
+        expect(adjustTargetSourceMock).toHaveBeenCalledWith(
+            "fakesource",
+            settings,
+        );
+        // should call adapter.update
+        expect(mockUpdate).toHaveBeenCalledWith(annotation);
+        // should call addAnnotation on client
+        expect(clientMock.addAnnotation).toHaveBeenCalledWith(annotation);
+    });
+
+    it("should respond to emitted deleteAnnotation event with handler", async () => {
+        const annotation = {
+            "@context": "fakeContext",
+            id: "someId",
+            body: {},
+            motivation: "commenting",
+            target: { source: "fakesource" },
+            type: "Annotation",
+        };
+        clientMock.emit("deleteAnnotation", annotation);
+        // should call adapter.delete
+        expect(mockDelete).toHaveBeenCalledWith(annotation.id);
     });
 });

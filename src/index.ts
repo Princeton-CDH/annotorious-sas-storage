@@ -58,6 +58,9 @@ class AnnotationServerStorage {
         this.anno.removeAnnotation(annotation.id);
         // add the saved annotation from SAS to Annotorious display
         this.anno.addAnnotation(newAnnotationV3);
+
+        // reload annotations
+        document.dispatchEvent(AnnoLoadEvent);
         return Promise.resolve(newAnnotationV3);
     }
 

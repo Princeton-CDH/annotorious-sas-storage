@@ -44,7 +44,7 @@ export default class SimpleAnnotationServerV2Adapter {
             },
             method: "POST",
         })
-            .then(() => this.all())
+            .then((annotationResponse: Response) => annotationResponse.json())
             .catch(() => this.all());
     }
 

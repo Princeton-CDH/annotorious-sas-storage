@@ -2,6 +2,7 @@
 
 import SimpleAnnotationServerV2Adapter from "./utils/SimpleAnnotationServerV2Adapter";
 import adjustTargetSource from "./utils/adjustTargetSource";
+import type { Annotation as V2Annotation } from "./types/V2/Annotation";
 import type { Annotation, SavedAnnotation } from "./types/V3/Annotation";
 import type { AnnotationPage } from "./types/V3/AnnotationPage";
 import type { Settings } from "./types/Settings";
@@ -9,6 +10,8 @@ import type { Settings } from "./types/Settings";
 // define a custom event to indicate that annotations have been loaded
 const AnnoLoadEvent = new Event("annotations-loaded");
 
+// TODO: Add a typedef for the Annotorious client (anno)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 class AnnotationServerStorage {
     anno;
 
@@ -31,26 +34,34 @@ class AnnotationServerStorage {
         this.anno.on("deleteAnnotation", this.handleDeleteAnnotation.bind(this));
 
         // load annotations from the server and signal for display
-        this.adapter.all().then((annotationPage: AnnotationPage) => {
-            this.anno.setAnnotations(annotationPage.items);
-            document.dispatchEvent(AnnoLoadEvent);
-        });
+        this.loadAnnotations();
+    }
+
+    async loadAnnotations() {
+        const annotationPage: AnnotationPage = await this.adapter.all();
+        this.anno.setAnnotations(annotationPage.items);
+        document.dispatchEvent(AnnoLoadEvent);
     }
 
     // handle create annotation event
-    async handleCreateAnnotation(annotation: Annotation) {
+    async handleCreateAnnotation(annotation: Annotation): Promise<Annotation> {
         annotation.target.source = adjustTargetSource(
             annotation.target.source,
             this.settings,
         );
-        this.adapter.create(annotation).then(() => {
-            // by default, storage reloads all annotations for this page;
-            // signal that annotations have been loaded
-            document.dispatchEvent(AnnoLoadEvent);
-        });
-        // how to update id for annotorious?
-        this.anno.addAnnotation(annotation);
-        return annotation;
+
+        // wait for adapter to return saved annotation from SAS
+        const newAnnotation: V2Annotation = await this.adapter.create(annotation);
+        const newAnnotationV3 = SimpleAnnotationServerV2Adapter.createV3Anno(newAnnotation);
+    
+        // remove the annotation with the old ID from Annotorious display
+        this.anno.removeAnnotation(annotation.id);
+        // add the saved annotation from SAS to Annotorious display
+        this.anno.addAnnotation(newAnnotationV3);
+
+        // reload annotations
+        document.dispatchEvent(AnnoLoadEvent);
+        return Promise.resolve(newAnnotationV3);
     }
 
     // update an annotation

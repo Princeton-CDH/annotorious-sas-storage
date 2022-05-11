@@ -66,8 +66,6 @@ This project is written in TypeScript, and organized according to the following 
 - `/dist` contains the build outputs and should not be directly modified
     - `/dist/index.js` is the entrypoint for the built JavaScipt code
 
-> Note: `/dist` is used for development builds, while bundled releases will be published to NPM.
-
 ### Code style and linting
 
 This project uses ESLint to manage code style and enforce consistency.

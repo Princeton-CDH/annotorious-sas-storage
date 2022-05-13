@@ -1,11 +1,3 @@
-/* Convert between v2 (open annotation) and v3 (w3c) annotations
-   in order to bridge between annotorious (w3c) and simple annotation server (v2).
-
-   Adapted from mirador-annotations code
-   https://github.com/ProjectMirador/mirador-annotations/blob/master/src/SimpleAnnotationServerV2Adapter.js
-
-*/
-
 import type { Annotation as V2Annotation } from "../types/V2/Annotation";
 import type { Annotation as V3Annotation } from "../types/V3/Annotation";
 import type { AnnotationPage } from "../types/V3/AnnotationPage";
@@ -16,23 +8,45 @@ import type { Selector as V3Selector } from "../types/V3/Selector";
 import type { Source } from "../types/V3/Source";
 import type { Target } from "../types/V3/Target";
 
+/**
+ * Convert between v2 (open annotation) and v3 (w3c) annotations
+ * in order to bridge between annotorious (w3c) and simple annotation server
+ * (v2).
+ *
+ * Adapted from mirador-annotations code:
+ * https://github.com/ProjectMirador/mirador-annotations/blob/master/src/SimpleAnnotationServerV2Adapter.js
+ */
 export default class SimpleAnnotationServerV2Adapter {
     canvasId: string;
 
     endpointUrl: string;
 
-    /** */
+    /**
+     * Instantiate the adapter.
+     *
+     * @param {string} canvasId ID of the annotated (or to-be-annotated) canvas
+     * @param {string} endpointUrl Endpoint URL of the Simple Annotation Server
+     * instance
+     */
     constructor(canvasId: string, endpointUrl: string) {
         this.canvasId = canvasId;
         this.endpointUrl = endpointUrl;
     }
 
-    /** */
+    /**
+     * Get the ID (URL) of the annotation page for this canvas.
+     *
+     * @returns {string} ID (URL) of the annotation page.
+     */
     get annotationPageId(): string {
         return `${this.endpointUrl}/search?uri=${this.canvasId}`;
     }
 
-    /** */
+    /**
+     * Save a new annotation to SAS storage.
+     *
+     * @param {V3Annotation} annotation V3 (W3C) annotation to save.
+     */
     async create(annotation: V3Annotation) {
         return fetch(`${this.endpointUrl}/create`, {
             body: JSON.stringify(
@@ -48,7 +62,11 @@ export default class SimpleAnnotationServerV2Adapter {
             .catch(() => this.all());
     }
 
-    /** */
+    /**
+     * Update an existing annotation in SAS storage.
+     *
+     * @param {V3Annotation} annotation V3 (W3C) annotation to update.
+     */
     async update(annotation: V3Annotation) {
         return fetch(`${this.endpointUrl}/update`, {
             body: JSON.stringify(
@@ -64,7 +82,12 @@ export default class SimpleAnnotationServerV2Adapter {
             .catch(() => this.all());
     }
 
-    /** */
+    /**
+     *
+     * Delete an existing annotation from SAS storage.
+     *
+     * @param {string} annoId ID of the annotation to delete.
+     */
     async delete(annoId: string) {
         return fetch(
             `${this.endpointUrl}/destroy?uri=${encodeURIComponent(annoId)}`,
@@ -80,8 +103,12 @@ export default class SimpleAnnotationServerV2Adapter {
             .catch(() => this.all());
     }
 
-    /** */
-    async get(annoId: string) {
+    /**
+     * Get a single existing annotation from SAS storage.
+     *
+     * @param {string} annoId ID of the annotation to retrieve.
+     */
+    async get(annoId: string): Promise<V3Annotation | undefined | null> {
         // SAS does not have GET for a single annotation
         const annotationPage = await this.all();
         if (annotationPage) {
@@ -92,14 +119,24 @@ export default class SimpleAnnotationServerV2Adapter {
         return null;
     }
 
-    /** Returns an AnnotationPage with all annotations */
+    /**
+     * Get all annotations on this canvas, and collect into an AnnotationPage.
+     *
+     * @returns {Promise<AnnotationPage>} AnnotationPage containing all
+     * annotations.
+     */
     async all(): Promise<AnnotationPage> {
         const resp = await fetch(this.annotationPageId);
         const annos = await resp.json();
         return this.createAnnotationPage(annos);
     }
 
-    /** Creates a V2 annotation from a V3 annotation */
+    /**
+     * Create a V2 (OpenAnnotation) annotation from a V3 (W3C) annotation.
+     *
+     * @param {V3Annotation} v3anno V3 (W3C) annotation to convert.
+     * @returns {V2Annotation} Converted V2 (OpenAnnotation) annotation.
+     */
     static createV2Anno(v3anno: V3Annotation): V2Annotation {
         let resource = null;
         if (Array.isArray(v3anno.body)) {
@@ -153,8 +190,14 @@ export default class SimpleAnnotationServerV2Adapter {
         return v2anno;
     }
 
-    /** */
-    static createV2AnnoBody(v3body: V3Body) {
+    /**
+     * Convert the "body" property of a V3 (W3C) annotation into a V2
+     * (OpenAnnotation) annotation body.
+     *
+     * @param {V3Body} v3body V3 (W3C) annotation "body" property
+     * @returns {V2Body} V2 (OpenAnnotation) annotation "body" property
+     */
+    static createV2AnnoBody(v3body: V3Body): V2Body {
         const v2body: V2Body = {
             "@type": v3body.purpose === "tagging" ? "oa:Tag" : "dctypes:Text",
             chars: v3body.value,
@@ -168,7 +211,13 @@ export default class SimpleAnnotationServerV2Adapter {
         return v2body;
     }
 
-    /** */
+    /**
+     * Convert the "selector" property of a V3 (W3C) annotation "target"
+     * property into a V2 (OpenAnnotation) selector.
+     *
+     * @param {V3Selector} v3selector V3 (W3C) "selector" property
+     * @returns {V2Selector} V2 (OpenAnnotation) "selector" property
+     */
     static createV2AnnoSelector(v3selector: V3Selector): V2Selector | null {
         switch (v3selector.type) {
             case "SvgSelector":
@@ -179,7 +228,8 @@ export default class SimpleAnnotationServerV2Adapter {
             case "FragmentSelector":
                 return {
                     "@type": "oa:FragmentSelector",
-                    // SAS uses location in xywh=x,y,w,h format; annotorious uses pixel:x,y,w,h
+                    // SAS uses location in xywh=x,y,w,h format; annotorious
+                    // uses pixel:x,y,w,h
                     value: v3selector.value.replace("xywh=pixel:", "xywh="),
                 };
             default:
@@ -187,7 +237,13 @@ export default class SimpleAnnotationServerV2Adapter {
         }
     }
 
-    /** Creates an AnnotationPage from a list of V2 annotations */
+    /**
+     * Create an AnnotationPage from a list of V2 annotations.
+     *
+     * @param {V2Annotation[]} v2annos List of V2 (OpenAnnotation) annotations.
+     * @returns {AnnotationPage} An AnnotationPage object containing the passed
+     * annotations converted to V3 (W3C).
+     */
     createAnnotationPage(v2annos: V2Annotation[]): AnnotationPage {
         if (Array.isArray(v2annos)) {
             const v3annos = v2annos.map((a) =>
@@ -202,7 +258,12 @@ export default class SimpleAnnotationServerV2Adapter {
         return v2annos;
     }
 
-    /** Creates a V3 annotation from a V2 annotation */
+    /**
+     * Create a V3 (W3C) annotation from a V2 (OpenAnnotation) annotation.
+     *
+     * @param {V2Annotation} v2anno V2 (OpenAnnotation) annotation to convert.
+     * @returns {V3Annotation} Converted V3 (W3C) annotation.
+     */
     static createV3Anno(v2anno: V2Annotation): V3Annotation {
         let body = null;
         if (Array.isArray(v2anno.resource)) {
@@ -240,7 +301,13 @@ export default class SimpleAnnotationServerV2Adapter {
         };
     }
 
-    /** */
+    /**
+     * Convert the "body" property of a V2 (OpenAnnotation) annotation
+     * into a V3 (W3C) annotation body.
+     *
+     * @param {V2Body} v2body V2 (OpenAnnotation) annotation "body" property
+     * @returns {V3Body} V3 (W3C) annotation "body" property
+     */
     static createV3AnnoBody(v2body: V2Body): V3Body {
         const v3body: V3Body = {
             type: "TextualBody",
@@ -258,10 +325,16 @@ export default class SimpleAnnotationServerV2Adapter {
         return v3body;
     }
 
-    /** */
+    /**
+     * Convert the "selector" property of a V2 (OpenAnnotation) annotation
+     * into a V3 (W3C) annotation "selector" property.
+     *
+     * @param {V2Selector} v2selector V2 (OpenAnnotation) "selector" property
+     * @returns {V3Selector} V3 (W3C) "selector" property
+     */
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     static createV3AnnoSelector(v2selector: V2Selector): any {
-        // TODO: type-safe this return value
+        // TODO: type-check this return value
         switch (v2selector["@type"]) {
             case "oa:SvgSelector":
                 return {
@@ -272,7 +345,8 @@ export default class SimpleAnnotationServerV2Adapter {
                 return {
                     type: "FragmentSelector",
                     conformsTo: "http://www.w3.org/TR/media-frags/",
-                    // SAS returns location in xywh=x,y,w,h format; annotorious uses pixel:x,y,w,h
+                    // SAS returns location in xywh=x,y,w,h format; annotorious
+                    // uses pixel:x,y,w,h
                     value: v2selector.value
                         ? v2selector.value.replace("xywh=", "xywh=pixel:")
                         : "",

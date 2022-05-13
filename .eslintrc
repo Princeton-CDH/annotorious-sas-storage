@@ -47,7 +47,7 @@
                 ]
             }
         ],
-        "max-len": ["error", { "code": 100, "tabWidth": 4 }]
+        "max-len": ["error", { "code": 80, "tabWidth": 4, "ignorePattern": "^import .*", "ignoreUrls": true }]
     },
     "settings": {
         "jsdoc": { "mode": "typescript" }

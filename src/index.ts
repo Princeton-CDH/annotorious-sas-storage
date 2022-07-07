@@ -63,7 +63,7 @@ class AnnotationServerStorage {
     async loadAnnotations() {
         const annotationPage: AnnotationPage = await this.adapter.all();
         this.anno.setAnnotations(annotationPage.items);
-        document.dispatchEvent(AnnoLoadEvent);
+        setTimeout(() => document.dispatchEvent(AnnoLoadEvent), 100);
     }
 
     /**

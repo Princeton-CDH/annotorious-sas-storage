@@ -62,7 +62,8 @@ describe("Plugin instantiation", () => {
         const storage = new AnnotationServerStorage(clientMock, settings);
         await storage.loadAnnotations();
 
-        // Should dispatch the event "annotations-loaded"
+        // Should dispatch the event "annotations-loaded" after 100ms
+        await new Promise(res => setTimeout(res, 100));
         expect(dispatchEventSpy).toHaveBeenCalledWith(
             new Event("annotations-loaded"),
         );

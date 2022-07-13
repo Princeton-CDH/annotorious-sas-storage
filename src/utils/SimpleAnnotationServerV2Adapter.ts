@@ -159,6 +159,7 @@ export default class SimpleAnnotationServerV2Adapter {
                 full: (v3anno.target.source as Source).id,
             },
             resource,
+            label: v3anno.label,
         };
         if (v3anno.target.selector) {
             if (Array.isArray(v3anno.target.selector)) {
@@ -295,6 +296,7 @@ export default class SimpleAnnotationServerV2Adapter {
             "@context": "http://www.w3.org/ns/anno.jsonld",
             id: v2anno["@id"],
             motivation: "commenting",
+            label: v2anno.label,
             type: "Annotation",
             target,
             body,

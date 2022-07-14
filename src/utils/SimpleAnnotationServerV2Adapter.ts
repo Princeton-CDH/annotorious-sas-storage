@@ -159,7 +159,6 @@ export default class SimpleAnnotationServerV2Adapter {
                 full: (v3anno.target.source as Source).id,
             },
             resource,
-            label: v3anno.label,
         };
         if (v3anno.target.selector) {
             if (Array.isArray(v3anno.target.selector)) {
@@ -208,6 +207,9 @@ export default class SimpleAnnotationServerV2Adapter {
         }
         if (v3body.language) {
             v2body.language = v3body.language;
+        }
+        if (v3body.label) {
+            v2body.label = v3body.label;
         }
         return v2body;
     }
@@ -296,7 +298,6 @@ export default class SimpleAnnotationServerV2Adapter {
             "@context": "http://www.w3.org/ns/anno.jsonld",
             id: v2anno["@id"],
             motivation: "commenting",
-            label: v2anno.label,
             type: "Annotation",
             target,
             body,
@@ -323,6 +324,9 @@ export default class SimpleAnnotationServerV2Adapter {
         }
         if (v2body["@type"] === "oa:Tag") {
             v3body.purpose = "tagging";
+        }
+        if (v2body.label) {
+            v3body.label = v2body.label;
         }
         return v3body;
     }

@@ -10,7 +10,6 @@ interface Annotation {
     "@context": string;
     "@type": string;
     "@id"?: string;
-    label?: string;
     motivation: string;
     on: Target;
     resource: Body | Body[];

@@ -208,6 +208,9 @@ export default class SimpleAnnotationServerV2Adapter {
         if (v3body.language) {
             v2body.language = v3body.language;
         }
+        if (v3body.label) {
+            v2body.label = v3body.label;
+        }
         return v2body;
     }
 
@@ -321,6 +324,9 @@ export default class SimpleAnnotationServerV2Adapter {
         }
         if (v2body["@type"] === "oa:Tag") {
             v3body.purpose = "tagging";
+        }
+        if (v2body.label) {
+            v3body.label = v2body.label;
         }
         return v3body;
     }

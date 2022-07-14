@@ -11,7 +11,7 @@ interface Annotation {
     body: Body | Body[];
     id?: string;
     motivation: string;
-    target: Target;   
+    target: Target;
     type: string;
 }
 
